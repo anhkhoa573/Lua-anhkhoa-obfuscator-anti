@@ -1,0 +1,16 @@
+{
+  "app_name": "Lua Obfuscator Pro",
+  "version": "2.0.0",
+  "features": [
+    "anti-tamper",
+    "anti-hook",
+    "minify",
+    "loadstring-wrapper",
+    "disable-devtool"
+  ],
+  "default_options": {
+    "antiTamper": true,
+    "minify": true,
+    "loadstringMode": true
+  }
+}
