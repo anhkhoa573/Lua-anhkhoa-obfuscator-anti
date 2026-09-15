@@ -12,19 +12,27 @@ body{background:linear-gradient(135deg,#0a0a0a,#1a1a2e);color:#e0e0e0;min-height
 header{text-align:center;padding:30px 0}
 header h1{font-size:2.5rem;background:linear-gradient(90deg,#00d4ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 header p{color:#888;font-size:.9rem}
-.toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.9rem}
+.toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.9rem;transition:all .3s}
 .btn-primary{background:linear-gradient(90deg,#00d4ff,#7b2ff7);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(0,212,255,.4)}
 .btn-secondary{background:#2a2a3e;color:#e0e0e0;border:1px solid #3a3a5e}
+.btn-secondary:hover{background:#3a3a5e}
 .btn-danger{background:#8b1a1a;color:#fff}
+.btn-danger:hover{background:#a02020}
+.file-input-wrapper{position:relative;overflow:hidden;display:inline-block}
+.file-input-wrapper input[type="file"]{position:absolute;left:0;top:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .editor-container{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:900px){.editor-container{grid-template-columns:1fr}}
 .editor-box{background:#12121a;border-radius:12px;border:1px solid #2a2a3e;overflow:hidden}
-.editor-header{padding:12px 16px;background:#1a1a2e;border-bottom:1px solid #2a2a3e}
+.editor-header{padding:12px 16px;background:#1a1a2e;border-bottom:1px solid #2a2a3e;display:flex;justify-content:space-between;align-items:center}
 .editor-header span{font-weight:600;color:#00d4ff;font-size:.85rem}
+.editor-header .char-count{color:#666;font-size:.75rem}
 textarea{width:100%;height:350px;background:#0d0d14;border:none;color:#e0e0e0;padding:16px;font-family:Consolas,monospace;font-size:13px;line-height:1.6;resize:vertical;outline:none}
+textarea::placeholder{color:#444}
 .options-panel{background:#12121a;border-radius:12px;border:1px solid #2a2a3e;padding:20px;margin-bottom:20px}
-.options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+.options-panel h3{color:#7b2ff7;margin-bottom:15px;font-size:1rem}
+.options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
 .option-item{display:flex;align-items:center;gap:8px}
 .option-item input[type="checkbox"]{width:18px;height:18px;accent-color:#00d4ff;cursor:pointer}
 .option-item input[type="text"]{flex:1;padding:8px;background:#0d0d14;border:1px solid #3a3a5e;border-radius:6px;color:#e0e0e0;font-size:.85rem}
@@ -36,33 +44,94 @@ textarea{width:100%;height:350px;background:#0d0d14;border:none;color:#e0e0e0;pa
 </head>
 <body>
 <div class="container">
-<header><h1>🔐 Lua Obfuscator Pro</h1><p>Anti-Tamper • Anti-Hook • Delta X Ready</p></header>
+<header>
+<h1>🔐 Lua Obfuscator Pro</h1>
+<p>Anti-Tamper • Anti-Hook • Delta X Ready</p>
+</header>
+
 <div class="toolbar">
+<div class="file-input-wrapper">
+<button class="btn btn-secondary">📁 Chọn file Lua</button>
+<input type="file" id="fileInput" accept=".lua,.txt" onchange="loadFile(event)">
+</div>
 <button class="btn btn-primary" onclick="obfuscate()">⚡ Obfuscate</button>
 <button class="btn btn-secondary" onclick="copyLoadstring()">📋 Copy Loadstring</button>
 <button class="btn btn-secondary" onclick="copyRaw()">📋 Copy Raw</button>
+<button class="btn btn-secondary" onclick="downloadOutput()">⬇️ Tải xuống</button>
+<button class="btn btn-danger" onclick="clearInput()">🗑️ Clear</button>
 <button class="btn btn-danger" onclick="clearAll()">🧹 Clear All</button>
 </div>
+
 <div class="options-panel">
+<h3>⚙️ Tùy chọn bảo vệ</h3>
 <div class="options-grid">
-<div class="option-item"><label style="min-width:80px">Tên script:</label><input type="text" id="scriptName" placeholder="my_script" value="my_script"></div>
-<div class="option-item"><input type="checkbox" id="antiTamper" checked><label for="antiTamper">Anti-Tamper</label></div>
-<div class="option-item"><input type="checkbox" id="minify" checked><label for="minify">Nén Raw</label></div>
-<div class="option-item"><input type="checkbox" id="loadstringMode" checked><label for="loadstringMode">Wrap loadstring</label></div>
+<div class="option-item">
+<label style="min-width:80px">Tên script:</label>
+<input type="text" id="scriptName" placeholder="my_script" value="my_script">
+</div>
+<div class="option-item">
+<input type="checkbox" id="antiTamper" checked>
+<label for="antiTamper">Anti-Tamper</label>
+</div>
+<div class="option-item">
+<input type="checkbox" id="minify" checked>
+<label for="minify">Nén Raw</label>
+</div>
+<div class="option-item">
+<input type="checkbox" id="loadstringMode" checked>
+<label for="loadstringMode">Wrap loadstring</label>
 </div>
 </div>
+</div>
+
 <div class="editor-container">
-<div class="editor-box"><div class="editor-header"><span>📥 Input Code</span></div><textarea id="inputCode" placeholder="Dán code Lua vào đây..."></textarea></div>
-<div class="editor-box"><div class="editor-header"><span>📤 Output Code</span></div><textarea id="outputCode" readonly placeholder="Kết quả..."></textarea></div>
+<div class="editor-box">
+<div class="editor-header">
+<span>📥 Input Code</span>
+<span class="char-count" id="inputCount">0 ký tự</span>
 </div>
-<div class="status-bar"><span id="statusText">Sẵn sàng</span></div>
+<textarea id="inputCode" placeholder="Dán code Lua vào đây hoặc chọn file..." oninput="updateCount()"></textarea>
 </div>
+<div class="editor-box">
+<div class="editor-header">
+<span>📤 Output Code</span>
+<span class="char-count" id="outputCount">0 ký tự</span>
+</div>
+<textarea id="outputCode" readonly placeholder="Kết quả..."></textarea>
+</div>
+</div>
+
+<div class="status-bar">
+<span id="statusText">Sẵn sàng</span>
+<span id="statusDetail">v2.0.0</span>
+</div>
+</div>
+
 <script>
 DisableDevtool({
     ondevtoolopen: () => { window.location.href = 'about:blank'; },
     disableMenu: true,
     clearLog: true,
 });
+
+function updateCount() {
+    const i = document.getElementById('inputCode');
+    const o = document.getElementById('outputCode');
+    document.getElementById('inputCount').textContent = i.value.length + ' ký tự';
+    document.getElementById('outputCount').textContent = o.value.length + ' ký tự';
+}
+
+function loadFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('inputCode').value = e.target.result;
+        updateCount();
+        setStatus('Đã load file: ' + file.name, 'success');
+    };
+    reader.readAsText(file);
+}
 
 function minifyLua(code) {
     let r = code.replace(/--\[\[[\s\S]*?\]\]/g, '');
@@ -80,14 +149,21 @@ async function obfuscate() {
         const res = await fetch('/api/obfuscate', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ code, options: { antiTamper: document.getElementById('antiTamper').checked, minify: document.getElementById('minify').checked } })
+            body: JSON.stringify({
+                code: code,
+                options: {
+                    antiTamper: document.getElementById('antiTamper').checked,
+                    minify: document.getElementById('minify').checked
+                }
+            })
         });
         const data = await res.json();
         if (data.ok) {
             let output = data.output;
             if (document.getElementById('minify').checked) output = minifyLua(output);
             document.getElementById('outputCode').value = output;
-            setStatus('Thành công!', 'success');
+            updateCount();
+            setStatus('Obfuscate thành công!', 'success');
         } else { setStatus('Lỗi: ' + data.error, 'error'); }
     } catch (e) { setStatus('Lỗi kết nối: ' + e.message, 'error'); }
 }
@@ -95,17 +171,53 @@ async function obfuscate() {
 function copyLoadstring() {
     const output = document.getElementById('outputCode').value;
     if (!output) { setStatus('Chưa có output!', 'error'); return; }
-    navigator.clipboard.writeText('loadstring([==[\n' + output + '\n]==])()').then(() => setStatus('Đã copy loadstring!', 'success'));
+    navigator.clipboard.writeText('loadstring([==[\n' + output + '\n]==])()').then(() => {
+        setStatus('Đã copy loadstring!', 'success');
+    });
 }
 
 function copyRaw() {
     const output = document.getElementById('outputCode').value;
     if (!output) { setStatus('Chưa có output!', 'error'); return; }
-    navigator.clipboard.writeText(output).then(() => setStatus('Đã copy raw!', 'success'));
+    navigator.clipboard.writeText(output).then(() => {
+        setStatus('Đã copy raw!', 'success');
+    });
 }
 
-function clearAll() { document.getElementById('inputCode').value = ''; document.getElementById('outputCode').value = ''; setStatus('Đã xóa tất cả', ''); }
-function setStatus(msg, type) { const s = document.getElementById('statusText'); s.textContent = msg; s.className = type || ''; }
+function downloadOutput() {
+    const output = document.getElementById('outputCode').value;
+    if (!output) { setStatus('Không có gì để tải!', 'error'); return; }
+    const name = document.getElementById('scriptName').value || 'script';
+    const blob = new Blob([output], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name + '.lua';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setStatus('Đã tải file!', 'success');
+}
+
+function clearInput() {
+    document.getElementById('inputCode').value = '';
+    updateCount();
+    setStatus('Đã xóa input', '');
+}
+
+function clearAll() {
+    document.getElementById('inputCode').value = '';
+    document.getElementById('outputCode').value = '';
+    updateCount();
+    setStatus('Đã xóa tất cả', '');
+}
+
+function setStatus(msg, type) {
+    const s = document.getElementById('statusText');
+    s.textContent = msg;
+    s.className = type || '';
+}
 </script>
 </body>
-</html>
+    </html>
